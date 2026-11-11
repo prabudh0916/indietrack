@@ -1,4 +1,5 @@
 import os
+import tempfile
 from pathlib import Path
 
 # Base directory of the project
@@ -20,11 +21,14 @@ class Config:
     APP_BASE_URL = os.environ.get("APP_BASE_URL", "http://127.0.0.1:5000")
     
     # Database Configuration
-    # Defaults to local SQLite for development if Azure SQL is not provided
-    SQLALCHEMY_DATABASE_URI = os.environ.get(
-        "DATABASE_URL",
-        f"sqlite:///{BASE_DIR / 'instance' / 'indietrack_dev.db'}"
+    # Defaults to local SQLite for development if Azure SQL is not provided.
+    # On Vercel, the local filesystem is read-only except for tempfile.gettempdir() (/tmp).
+    _default_db = (
+        f"sqlite:///{Path(tempfile.gettempdir()) / 'indietrack_dev.db'}"
+        if os.environ.get("VERCEL")
+        else f"sqlite:///{BASE_DIR / 'instance' / 'indietrack_dev.db'}"
     )
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", _default_db)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
         "pool_pre_ping": True,
@@ -35,7 +39,12 @@ class Config:
     AZURE_STORAGE_CONTAINER = os.environ.get("AZURE_STORAGE_CONTAINER", "indietrack-assets")
     
     # Local Storage Fallback Folder (used in development when Azure Storage is not configured)
-    LOCAL_UPLOAD_FOLDER = os.environ.get("LOCAL_UPLOAD_FOLDER", str(BASE_DIR / "uploads"))
+    _default_upload = (
+        str(Path(tempfile.gettempdir()) / "uploads")
+        if os.environ.get("VERCEL")
+        else str(BASE_DIR / "uploads")
+    )
+    LOCAL_UPLOAD_FOLDER = os.environ.get("LOCAL_UPLOAD_FOLDER", _default_upload)
     MAX_CONTENT_LENGTH = 25 * 1024 * 1024  # 25 MB max file upload size
     
     # Allowed file extensions and MIME content-types for security

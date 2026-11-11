@@ -1,4 +1,6 @@
 import os
+import tempfile
+from pathlib import Path
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
@@ -22,13 +24,20 @@ def create_app(config_name=None):
     if config_name is None:
         config_name = os.environ.get("FLASK_ENV", "development")
 
-    app = Flask(__name__, instance_relative_config=True)
+    instance_path = str(Path(tempfile.gettempdir()) / "indietrack_instance") if os.environ.get("VERCEL") else None
+    app = Flask(__name__, instance_path=instance_path, instance_relative_config=True)
     app.config.from_object(config_by_name.get(config_name, config_by_name["default"]))
 
-    # Ensure required instance and upload directories exist
-    os.makedirs(app.instance_path, exist_ok=True)
+    # Ensure required instance and upload directories exist (with fallback for serverless read-only filesystems)
+    try:
+        os.makedirs(app.instance_path, exist_ok=True)
+    except OSError:
+        pass
     if app.config.get("LOCAL_UPLOAD_FOLDER"):
-        os.makedirs(app.config["LOCAL_UPLOAD_FOLDER"], exist_ok=True)
+        try:
+            os.makedirs(app.config["LOCAL_UPLOAD_FOLDER"], exist_ok=True)
+        except OSError:
+            pass
 
     # Initialize extensions with app
     db.init_app(app)
