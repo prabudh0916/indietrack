@@ -161,7 +161,7 @@ python scripts/test_azure_connections.py
 ```
 This utility safely tests Azure SQL Database and Azure Blob Storage connectivity without exposing credentials or secret connection strings.
 
-For detailed Azure CLI deployment commands, firewall rules, and Azure App Service hosting steps, refer to [docs/deployment_guide.md](file:///c:/Users/HP/Desktop/indietrack/docs/deployment_guide.md).
+For detailed Azure App Service and Vercel serverless deployment steps, refer to [docs/deployment_guide.md](file:///c:/Users/HP/Desktop/indietrack/docs/deployment_guide.md).
 
 ---
 

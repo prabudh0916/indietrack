@@ -179,3 +179,21 @@ To immediately terminate all running resources and avoid unintended subscription
 ```bash
 az group delete --name $RESOURCE_GROUP --yes --no-wait
 ```
+
+---
+
+## 5. Alternative Serverless Deployment: Vercel
+
+IndieTrack also supports direct deployment to **Vercel** as a serverless Python WSGI application:
+
+### 5.1 Architecture on Vercel
+- **Entrypoint:** `api/index.py` with custom `VercelPathMiddleware` resolving internal rewrites.
+- **Routing Configuration:** `vercel.json` utilizing the `@vercel/python` builder.
+- **Database & Uploads:** Automatically detects the serverless environment and utilizes ephemeral `/tmp` storage with automatic database creation and sample data seeding.
+
+### 5.2 1-Click Vercel Deployment
+1. Connect your GitHub repository (`prabudh0916/indietrack`) on [vercel.com/new](https://vercel.com/new).
+2. Set **Framework Preset** to **Other**.
+3. Leave **Root Directory** as `./` and all build toggles OFF.
+4. Click **Deploy**. Vercel will provision a global HTTPS endpoint (`https://<project-name>.vercel.app`).
+
